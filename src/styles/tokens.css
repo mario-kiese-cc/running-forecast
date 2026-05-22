@@ -1,0 +1,99 @@
+/*
+ * Design tokens — single source of truth for color, spacing, type, radius,
+ * elevation, and motion. Imported once from `src/main.ts`.
+ *
+ * Rules of the road:
+ *   - Components must reference these tokens, never hard-coded colors.
+ *   - This file is dark-only by design (see ADR-004). A future
+ *     `prefers-color-scheme: light` layer can be added without component
+ *     changes.
+ *   - Legacy aliases at the bottom keep older components compiling while we
+ *     migrate. New code should prefer the canonical names above the aliases.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* ---------------- Color: surfaces ---------------- */
+  --color-bg: #0b0d10;
+  --color-surface: #14181d;
+  --color-surface-elevated: #1a1f25;
+  --color-border: #232930;
+  --color-border-strong: #2e353d;
+
+  /* ---------------- Color: text ---------------- */
+  --color-text: #e6e8eb;
+  --color-text-muted: #9097a0;
+  --color-text-subtle: #6b7077;
+
+  /* ---------------- Color: rating ----------------
+   * Retuned for legibility on dark surfaces. Avoid pure 100%-saturation
+   * hues — they read as neon. */
+  --color-rating-great: #34d399;
+  --color-rating-good: #a3e635;
+  --color-rating-fair: #fbbf24;
+  --color-rating-avoid: #f87171;
+
+  /* ---------------- Color: accent ----------------
+   * One brand accent (cool cyan). Use for focus rings and the primary CTA
+   * only — never as a body color. */
+  --color-accent: #22d3ee;
+  --color-accent-strong: #06b6d4;
+  --color-accent-contrast: #0b0d10;
+
+  /* ---------------- Spacing (4-px base) ---------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
+
+  /* ---------------- Radii ---------------- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* ---------------- Typography ---------------- */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, "Inter",
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-size-xs: 0.6875rem; /* 11px */
+  --font-size-sm: 0.75rem;   /* 12px */
+  --font-size-base: 0.875rem;/* 14px */
+  --font-size-md: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;  /* 18px */
+  --font-size-xl: 1.25rem;   /* 20px */
+  --font-size-2xl: 1.5rem;   /* 24px */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-strong: 600;
+  --letter-spacing-wide: 0.04em;
+
+  /* ---------------- Elevation ----------------
+   * Very subtle on dark — heavy shadows look muddy. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+
+  /* ---------------- Motion ---------------- */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ---------------- Layout ---------------- */
+  --max-width: 480px;
+
+  /* =================================================================
+   * Legacy aliases — kept so existing scoped styles keep compiling.
+   * Prefer the canonical names above for new code.
+   * ================================================================= */
+  --color-muted: var(--color-text-muted);
+  --color-card-bg: var(--color-surface);
+  --color-great: var(--color-rating-great);
+  --color-good: var(--color-rating-good);
+  --color-fair: var(--color-rating-fair);
+  --color-avoid: var(--color-rating-avoid);
+  --radius: var(--radius-md);
+}
