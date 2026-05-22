@@ -1,0 +1,17 @@
+{
+  "_description": "MOCK DATA — simplified Open-Meteo air quality response for testing.",
+  "latitude": 48.2,
+  "longitude": 16.4,
+  "timezone": "Europe/Vienna",
+  "hourly": {
+    "time": [
+      "2026-05-21T06:00",
+      "2026-05-21T07:00",
+      "2026-05-21T08:00",
+      "2026-05-21T12:00",
+      "2026-05-21T18:00",
+      "2026-05-21T22:00"
+    ],
+    "european_aqi": [25, 30, 35, 80, 120, 40]
+  }
+}

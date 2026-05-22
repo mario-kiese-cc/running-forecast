@@ -1,0 +1,28 @@
+{
+  "_description": "MOCK DATA — simplified Open-Meteo response for testing. 6 hours on one day.",
+  "latitude": 48.2,
+  "longitude": 16.38,
+  "timezone": "Europe/Vienna",
+  "hourly": {
+    "time": [
+      "2026-05-21T06:00",
+      "2026-05-21T07:00",
+      "2026-05-21T08:00",
+      "2026-05-21T12:00",
+      "2026-05-21T18:00",
+      "2026-05-21T22:00"
+    ],
+    "temperature_2m":             [12.0, 14.0, 16.0, 22.0, 19.0, 14.0],
+    "apparent_temperature":       [10.0, 13.0, 15.0, 24.0, 17.0, 12.0],
+    "precipitation_probability":  [0,    5,    10,   60,   80,   0],
+    "precipitation":              [0.0,  0.0,  0.0,  0.5,  3.2,  0.0],
+    "relative_humidity_2m":       [65,   55,   50,   45,   85,   70],
+    "wind_speed_10m":             [5.0,  8.0,  12.0, 25.0, 35.0, 3.0],
+    "uv_index":                   [1.0,  2.5,  4.0,  7.0,  2.0,  0.0]
+  },
+  "daily": {
+    "time": ["2026-05-21"],
+    "sunrise": ["2026-05-21T05:07"],
+    "sunset": ["2026-05-21T20:34"]
+  }
+}
