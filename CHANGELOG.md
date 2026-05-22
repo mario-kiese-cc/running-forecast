@@ -6,6 +6,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **GitHub Pages deployment:** `.github/workflows/deploy.yml` builds, tests, and deploys `dist/` to GitHub Pages on every push to `main`. Site URL: https://mario-kiese-cc.github.io/running-forecast/
+
+### Changed
+- `vite.config.ts` now sets `base: "/running-forecast/"` for production builds so assets resolve correctly under the GitHub Pages sub-path. Dev server (`pnpm dev`) continues to use `/`.
+
 ### Changed
 - **UI redesign:** dark theme, removed decorative emoji from header (🏃), location badge / prompt (📍), condition badges (🌡🌧💨💧🌫), late-night hint (🌙), error (⚠️), and refresh button (↻). Replaced with a small hand-rolled inline SVG icon set (`src/components/icon`). Cyan accent reserved for focus / primary CTA / location pin. See ADR-004 and `docs/design-system.md`.
 - Centralized design tokens in `src/styles/tokens.css` (imported once from `src/main.ts`). Components reference tokens by name; legacy aliases preserved for incremental migration.

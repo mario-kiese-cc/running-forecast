@@ -19,7 +19,7 @@
 - [ ] Implement basic Riegel race equivalence calculator
 - [ ] Design input format for training data (CSV? JSON? API?)
 - [ ] Research additional prediction models beyond Riegel (Cameron, VO2max-based)
-- [ ] Set up CI/CD pipeline
+- [x] Set up CI/CD pipeline (GitHub Actions → GitHub Pages)
 
 ## 🟢 Low Priority
 
@@ -37,3 +37,4 @@
 <!-- Move completed items here with completion date -->
 <!-- - [x] (2025-05-21) Set up project harness and agent instructions -->
 - [x] (2026-05-22) Dark theme + remove decorative emoji + establish design system (`docs/design-system.md`, ADR-004)
+- [x] (2026-05-22) GitHub Pages deployment via GitHub Actions

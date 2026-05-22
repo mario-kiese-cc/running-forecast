@@ -26,6 +26,14 @@ pnpm build     # Production build
 
 Requires Node.js v26+ and pnpm.
 
+## Deployment
+
+The site is auto-deployed to GitHub Pages on every push to `main` via `.github/workflows/deploy.yml`.
+
+**Live URL:** https://mario-kiese-cc.github.io/running-forecast/
+
+One-time repo setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
 ## Tech Stack
 
 - **Vue 3** (Composition API, `<script setup>`)
