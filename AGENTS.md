@@ -6,7 +6,14 @@ This is a **running forecast application** that predicts race performance based 
 
 ## Architecture & Tech Stack
 
-> **Decision:** Tech stack is not yet chosen. When the user decides, update this section immediately.
+- **Runtime:** Node.js v26 (via nvm)
+- **Framework:** Vue 3 (Composition API, `<script setup>`)
+- **Build tool:** Vite
+- **Language:** TypeScript (strict mode)
+- **Test runner:** Vitest + @vue/test-utils
+- **Package manager:** pnpm
+- **Styling:** Plain CSS / CSS modules
+- **Weather API:** Open-Meteo (free, no API key)
 
 ### Principles
 
@@ -91,7 +98,10 @@ running-forecast/
 - **Integration tests** — in `tests/` directory. Test module interactions and data flow.
 - **Test naming** — use descriptive names: `"should predict 5K time from 10K result using Riegel formula"`, not `"test1"`.
 - **No snapshot tests** unless explicitly requested. They create maintenance burden.
-- **Test commands** — document in this section once test runner is chosen.
+- **Test commands:**
+  - `pnpm test` — run all tests once
+  - `pnpm test:watch` — run tests in watch mode
+  - `pnpm build` — type-check + production build
 
 ## Common Pitfalls — Do NOT
 

@@ -1,8 +1,8 @@
 ---
 description: Review code for bugs, performance, and domain correctness
-argument-hint: "[file-or-area]"
+argument-hint: "<file-or-area>"
 ---
-Review the code $@ for:
+Review the code in $@ for:
 
 1. **Correctness** — logic errors, off-by-one, wrong formulas
 2. **Domain accuracy** — running science formulas and unit conversions (seconds, meters, pace)

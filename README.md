@@ -15,7 +15,24 @@ Predict race performance based on training data, historical results, and physiol
 
 ## Getting Started
 
-> Setup instructions will be added once the tech stack is chosen.
+## Getting Started
+
+```bash
+pnpm install
+pnpm dev       # Start dev server at http://localhost:5173
+pnpm test      # Run tests
+pnpm build     # Production build
+```
+
+Requires Node.js v26+ and pnpm.
+
+## Tech Stack
+
+- **Vue 3** (Composition API, `<script setup>`)
+- **Vite** — build tool
+- **TypeScript** — strict mode
+- **Vitest** — test runner
+- **Open-Meteo** — free weather API (no key required)
 
 ## Project Structure
 

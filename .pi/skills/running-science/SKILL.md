@@ -91,6 +91,24 @@ TSB = CTL - ATL
 - Negative TSB → fatigued
 - Race-ready window: TSB between +10 and +25
 
+## Model Selection Guide
+
+| Scenario | Recommended Model | Why |
+|----------|-------------------|-----|
+| Quick estimate, similar distances (5K↔10K) | Riegel | Simple, well-understood, accurate for adjacent distances |
+| Predicting marathon from 5K or shorter | Cameron or VO2max | Riegel over-predicts marathon from short distances |
+| Training-zone calculation | VO2max (Daniels) | Directly yields VDOT for zone lookup |
+| Recreational runners | Riegel with fatigue factor 1.08–1.15 | Slower runners fatigue more at longer distances |
+| Elite/sub-elite runners | Riegel with fatigue factor 1.04–1.06 | Elites maintain efficiency better |
+
+## Input Validation Rules
+
+- Race time must be > 0 seconds
+- Distance must be > 0 meters
+- Reject distances < 100m (sprint, not distance running)
+- Reject pace < 2:00/km (faster than any human) or > 15:00/km (walking)
+- VO2max must be between 15 and 90 ml/kg/min for plausible values
+
 ## Implementation Notes
 
 - Always store times in **seconds** (float64) internally
@@ -98,3 +116,4 @@ TSB = CTL - ATL
 - Use **epsilon comparison** for floating point equality (ε = 0.001 for seconds)
 - Pace display format: `M:SS/km` (e.g., `4:30/km`)
 - Time display format: `H:MM:SS` for races > 1 hour, `MM:SS` for shorter
+- Seconds display in pace: always zero-padded (`:05`, not `:5`)
