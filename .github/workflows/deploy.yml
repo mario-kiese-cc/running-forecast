@@ -10,6 +10,14 @@ permissions:
   pages: write
   id-token: write
 
+# Opt the JavaScript-based actions (checkout, setup-node, pnpm/action-setup,
+# configure-pages, upload-pages-artifact, deploy-pages) into the Node.js 24
+# runtime ahead of the June 2026 default switch. Remove once Node 24 is the
+# runner default. See:
+# https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 # Allow only one concurrent deployment; don't cancel in-progress runs so a
 # release finishes cleanly, but skip any queued runs in favor of the latest.
 concurrency:
