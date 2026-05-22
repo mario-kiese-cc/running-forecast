@@ -52,28 +52,28 @@ function formatPrecip(probability: number): string {
 
     <div class="slot-card__conditions">
       <ConditionBadge
-        icon="🌡"
+        icon="thermometer"
         label="Feels like"
         :value="formatTemp(props.slot.conditions.apparentTemperatureCelsius)"
       />
       <ConditionBadge
-        icon="🌧"
+        icon="rain"
         label="Rain chance"
         :value="formatPrecip(props.slot.conditions.precipitationProbability)"
       />
       <ConditionBadge
-        icon="💨"
+        icon="wind"
         label="Wind"
         :value="formatWind(props.slot.conditions.windSpeedKmh)"
       />
       <ConditionBadge
-        icon="💧"
+        icon="droplet"
         label="Humidity"
         :value="formatHumidity(props.slot.conditions.relativeHumidity)"
       />
       <ConditionBadge
         v-if="props.slot.aqi !== undefined"
-        icon="🌫"
+        icon="haze"
         label="Air quality"
         :value="String(props.slot.aqi)"
       />
@@ -83,31 +83,32 @@ function formatPrecip(probability: number): string {
 
 <style scoped>
 .slot-card {
-  background: var(--color-card-bg);
-  border-radius: var(--radius);
-  padding: 12px 16px;
-  border-left: 4px solid var(--color-border);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
 }
 
 .slot-card--great {
-  border-left-color: var(--color-great);
+  border-left-color: var(--color-rating-great);
 }
 
 .slot-card--good {
-  border-left-color: var(--color-good);
+  border-left-color: var(--color-rating-good);
 }
 
 .slot-card--fair {
-  border-left-color: var(--color-fair);
+  border-left-color: var(--color-rating-fair);
 }
 
 .slot-card--avoid {
-  border-left-color: var(--color-avoid);
+  border-left-color: var(--color-rating-avoid);
 }
 
 /* Nighttime (21:00–05:59): muted so users don't focus on impractical hours. */
 .slot-card--night {
-  opacity: 0.5;
+  opacity: 0.55;
   border-left-color: var(--color-border);
 }
 
@@ -115,24 +116,27 @@ function formatPrecip(probability: number): string {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 .slot-card__time {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-strong);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
 }
 
 .slot-card__score {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--color-muted);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-strong);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .slot-card__conditions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
 }
 </style>

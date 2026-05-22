@@ -6,6 +6,7 @@ import { buildDayForecasts, getTodayString } from "./services/slot-builder";
 import TimelineView from "./components/timeline-view.vue";
 import LocationPrompt from "./components/location-prompt.vue";
 import LocationBadge from "./components/location-badge.vue";
+import Icon from "./components/icon/icon.vue";
 import type { UserLocation } from "./types";
 
 const { location, status: locationStatus, setManualLocation } = useLocation();
@@ -44,7 +45,7 @@ function handleCancelChange(): void {
 <template>
   <main class="app">
     <header class="app__header">
-      <h1>🏃 Running Forecast</h1>
+      <h1 class="app__title">Running Forecast</h1>
       <p class="app__subtitle">Find the best time to run</p>
     </header>
 
@@ -63,7 +64,8 @@ function handleCancelChange(): void {
           :disabled="weatherStatus === 'loading'"
           @click="refresh"
         >
-          {{ weatherStatus === 'loading' ? '↻ Loading…' : '↻ Refresh' }}
+          <Icon name="refresh" :size="14" />
+          <span>{{ weatherStatus === 'loading' ? 'Loading' : 'Refresh' }}</span>
         </button>
       </div>
 
@@ -82,7 +84,10 @@ function handleCancelChange(): void {
         </div>
 
         <div v-else-if="weatherStatus === 'error'" class="app__error">
-          <p>⚠️ {{ errorMessage }}</p>
+          <p class="app__error-message">
+            <Icon name="alert" :size="16" label="Error" />
+            <span>{{ errorMessage }}</span>
+          </p>
           <button class="app__refresh" @click="refresh">Try again</button>
         </div>
 
@@ -97,6 +102,10 @@ function handleCancelChange(): void {
 </template>
 
 <style>
+/*
+ * Global reset only. Design tokens live in src/styles/tokens.css and are
+ * imported once from src/main.ts. Do not redefine tokens here.
+ */
 *,
 *::before,
 *::after {
@@ -105,70 +114,67 @@ function handleCancelChange(): void {
   padding: 0;
 }
 
-:root {
-  --color-bg: #f5f5f7;
-  --color-text: #1a1a1a;
-  --color-muted: #6b7280;
-  --color-great: #22c55e;
-  --color-good: #84cc16;
-  --color-fair: #f59e0b;
-  --color-avoid: #ef4444;
-  --color-card-bg: #ffffff;
-  --color-border: #e5e7eb;
-  --radius: 12px;
-  --max-width: 480px;
-}
-
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-family-sans);
   background: var(--color-bg);
   color: var(--color-text);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 .app {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: var(--space-6) var(--space-4) var(--space-8);
 }
 
 .app__header {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
 }
 
-.app__header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
+.app__title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-strong);
+  letter-spacing: -0.01em;
+  color: var(--color-text);
 }
 
 .app__subtitle {
-  color: var(--color-muted);
-  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+  margin-top: var(--space-1);
 }
 
 .app__toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  padding: 8px 0;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding: var(--space-2) 0;
 }
 
 .app__refresh {
-  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-card-bg);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
   color: var(--color-text);
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
+  font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .app__refresh:hover {
-  background: var(--color-bg);
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border-strong);
 }
 
 .app__refresh:disabled {
@@ -178,17 +184,20 @@ body {
 
 .app__status {
   text-align: center;
-  padding: 40px 0;
-  color: var(--color-muted);
+  padding: var(--space-8) 0;
+  color: var(--color-text-muted);
 }
 
 .app__error {
   text-align: center;
-  padding: 24px 0;
-  color: var(--color-avoid);
+  padding: var(--space-6) 0;
+  color: var(--color-rating-avoid);
 }
 
-.app__error button {
-  margin-top: 12px;
+.app__error-message {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 </style>

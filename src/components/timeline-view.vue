@@ -2,6 +2,7 @@
 import type { DayForecast } from "../services/slot-builder";
 import { formatWindowRange } from "../services/format-window";
 import TimeSlotCard from "./time-slot-card.vue";
+import Icon from "./icon/icon.vue";
 
 const props = defineProps<{
   forecasts: DayForecast[];
@@ -25,7 +26,8 @@ const props = defineProps<{
       >
         <p class="timeline__best-title">Best time to run</p>
         <p v-if="day.bestWindowsAreLateNight" class="timeline__best-hint">
-          🌙 Only late-night windows look good today.
+          <Icon name="moon" :size="14" />
+          <span>Only late-night windows look good today.</span>
         </p>
         <div
           v-for="(window, index) in day.bestWindows.slice(0, 3)"
@@ -62,82 +64,94 @@ const props = defineProps<{
 .timeline {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-6);
 }
 
 .timeline__day-label {
-  font-size: 1.125rem;
-  font-weight: 700;
-  margin-bottom: 12px;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-strong);
+  color: var(--color-text);
+  margin-bottom: var(--space-3);
 }
 
 .timeline__best {
-  background: var(--color-card-bg);
-  border-radius: var(--radius);
-  padding: 12px 16px;
-  margin-bottom: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
 }
 
 .timeline__best-title {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-strong);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-muted);
-  margin-bottom: 8px;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
 }
 
 .timeline__best-hint {
-  font-size: 0.8125rem;
-  color: var(--color-muted);
-  margin-bottom: 8px;
-  font-style: italic;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
 }
 
 .timeline__best-window {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 10px;
-  border-radius: 8px;
-  margin-bottom: 4px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-1);
+  border: 1px solid transparent;
 }
 
 .timeline__best-window--great {
-  background: color-mix(in srgb, var(--color-great) 12%, transparent);
+  background: color-mix(in srgb, var(--color-rating-great) 14%, transparent);
+  border-color: color-mix(in srgb, var(--color-rating-great) 28%, transparent);
 }
 
 .timeline__best-window--good {
-  background: color-mix(in srgb, var(--color-good) 12%, transparent);
+  background: color-mix(in srgb, var(--color-rating-good) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-rating-good) 24%, transparent);
 }
 
 .timeline__best-window--fair {
-  background: color-mix(in srgb, var(--color-fair) 12%, transparent);
+  background: color-mix(in srgb, var(--color-rating-fair) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-rating-fair) 24%, transparent);
 }
 
 .timeline__best-window--avoid {
-  background: color-mix(in srgb, var(--color-avoid) 12%, transparent);
+  background: color-mix(in srgb, var(--color-rating-avoid) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-rating-avoid) 24%, transparent);
 }
 
 .timeline__best-range {
-  font-weight: 600;
-  font-size: 0.9375rem;
+  font-weight: var(--font-weight-strong);
+  font-size: var(--font-size-base);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
 }
 
 .timeline__best-score {
-  font-size: 0.8125rem;
-  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .timeline__slots {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .timeline__empty {
   text-align: center;
-  color: var(--color-muted);
-  padding: 40px 0;
+  color: var(--color-text-muted);
+  padding: var(--space-8) 0;
 }
 </style>

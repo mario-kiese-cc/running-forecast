@@ -72,7 +72,7 @@ function selectCandidate(candidate: GeocodingCandidate): void {
 
 <template>
   <div class="location-prompt">
-    <h2 class="location-prompt__title">📍 Set Your Location</h2>
+    <h2 class="location-prompt__title">Set your location</h2>
     <p class="location-prompt__subtitle">
       Enter your city to get a running forecast.
     </p>
@@ -131,53 +131,65 @@ function selectCandidate(candidate: GeocodingCandidate): void {
 
 <style scoped>
 .location-prompt {
-  background: var(--color-card-bg);
-  border-radius: var(--radius);
-  padding: 24px 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-5);
   text-align: center;
 }
 
 .location-prompt__title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 4px;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-strong);
+  color: var(--color-text);
+  margin-bottom: var(--space-1);
+  letter-spacing: -0.01em;
 }
 
 .location-prompt__subtitle {
-  font-size: 0.875rem;
-  color: var(--color-muted);
-  margin-bottom: 20px;
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-5);
 }
 
 .location-prompt__form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
   text-align: left;
 }
 
 .location-prompt__field label {
   display: block;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-muted);
-  margin-bottom: 4px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-strong);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-1);
 }
 
 .location-prompt__field input {
   width: 100%;
-  padding: 10px 12px;
+  padding: var(--space-3) var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
-  font-size: 0.9375rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-md);
+  font-family: inherit;
   background: var(--color-bg);
   color: var(--color-text);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.location-prompt__field input::placeholder {
+  color: var(--color-text-subtle);
 }
 
 .location-prompt__field input:focus {
-  border-color: var(--color-good);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 25%, transparent);
 }
 
 .location-prompt__field input:disabled {
@@ -185,36 +197,44 @@ function selectCandidate(candidate: GeocodingCandidate): void {
 }
 
 .location-prompt__error {
-  font-size: 0.8125rem;
-  color: var(--color-avoid);
+  font-size: var(--font-size-sm);
+  color: var(--color-rating-avoid);
 }
 
 .location-prompt__actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .location-prompt__button {
   flex: 1;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  background: var(--color-great);
-  color: white;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-strong);
+  font-family: inherit;
   cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.location-prompt__button--secondary {
-  background: var(--color-card-bg);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
+  transition: background var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
 }
 
 .location-prompt__button:hover {
-  opacity: 0.9;
+  background: var(--color-accent-strong);
+}
+
+.location-prompt__button--secondary {
+  background: transparent;
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.location-prompt__button--secondary:hover {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border-strong);
 }
 
 .location-prompt__button:disabled {
@@ -223,34 +243,36 @@ function selectCandidate(candidate: GeocodingCandidate): void {
 }
 
 .location-prompt__candidates {
-  margin-top: 16px;
+  margin-top: var(--space-4);
   text-align: left;
 }
 
 .location-prompt__candidates-title {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-muted);
-  margin-bottom: 8px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-strong);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
 }
 
 .location-prompt__candidate {
   display: block;
   width: 100%;
-  padding: 10px 12px;
-  margin-bottom: 4px;
+  padding: var(--space-3);
+  margin-bottom: var(--space-1);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--color-bg);
   color: var(--color-text);
-  font-size: 0.875rem;
+  font-size: var(--font-size-base);
+  font-family: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
 }
 
 .location-prompt__candidate:hover {
-  background: var(--color-card-bg);
-  border-color: var(--color-good);
+  background: var(--color-surface-elevated);
+  border-color: var(--color-accent);
 }
 </style>

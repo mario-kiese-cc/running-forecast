@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { UserLocation } from "../types";
+import Icon from "./icon/icon.vue";
 
 const props = defineProps<{
   location: UserLocation;
@@ -29,7 +30,7 @@ const sourceLabel = computed(() => {
 <template>
   <div class="location-badge">
     <span class="location-badge__pill">
-      <span class="location-badge__icon" aria-hidden="true">📍</span>
+      <Icon name="location" :size="14" class="location-badge__icon" />
       <span
         class="location-badge__name"
         :class="{ 'location-badge__name--placeholder': isResolvingCity }"
@@ -63,66 +64,75 @@ const sourceLabel = computed(() => {
 .location-badge__pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--color-card-bg);
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
-  font-size: 0.8125rem;
+  font-size: var(--font-size-base);
   color: var(--color-text);
   max-width: 100%;
 }
 
 .location-badge__icon {
-  font-size: 0.875rem;
+  color: var(--color-accent);
 }
 
 .location-badge__name {
-  font-weight: 600;
+  font-weight: var(--font-weight-strong);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .location-badge__name--placeholder {
-  font-weight: 500;
-  color: var(--color-muted);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-muted);
   font-style: italic;
 }
 
 .location-badge__source {
-  font-size: 0.6875rem;
-  font-weight: 600;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-strong);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 1px 6px;
-  border-radius: 999px;
+  letter-spacing: var(--letter-spacing-wide);
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
 }
 
 .location-badge__source--detected {
-  background: color-mix(in srgb, var(--color-good) 18%, transparent);
-  color: color-mix(in srgb, var(--color-good) 70%, var(--color-text));
+  color: var(--color-rating-great);
+  border-color: color-mix(in srgb, var(--color-rating-great) 30%, transparent);
+  background: color-mix(in srgb, var(--color-rating-great) 10%, transparent);
 }
 
 .location-badge__source--manual {
-  background: color-mix(in srgb, var(--color-fair) 18%, transparent);
-  color: color-mix(in srgb, var(--color-fair) 70%, var(--color-text));
+  color: var(--color-rating-fair);
+  border-color: color-mix(in srgb, var(--color-rating-fair) 30%, transparent);
+  background: color-mix(in srgb, var(--color-rating-fair) 10%, transparent);
 }
 
 .location-badge__change {
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
-  color: var(--color-muted);
-  font-size: 0.75rem;
-  font-weight: 600;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-strong);
+  font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
 }
 
 .location-badge__change:hover {
-  background: var(--color-bg);
+  background: var(--color-surface-elevated);
   color: var(--color-text);
+  border-color: var(--color-border-strong);
 }
 </style>

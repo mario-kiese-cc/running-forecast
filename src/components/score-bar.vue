@@ -7,10 +7,10 @@ const props = defineProps<{
 }>();
 
 const ratingColors: Record<ScoreRating, string> = {
-  great: "var(--color-great)",
-  good: "var(--color-good)",
-  fair: "var(--color-fair)",
-  avoid: "var(--color-avoid)",
+  great: "var(--color-rating-great)",
+  good: "var(--color-rating-good)",
+  fair: "var(--color-rating-fair)",
+  avoid: "var(--color-rating-avoid)",
 };
 
 const ratingLabels: Record<ScoreRating, string> = {
@@ -45,27 +45,28 @@ const ratingLabels: Record<ScoreRating, string> = {
 .score-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .score-bar__track {
   flex: 1;
   height: 6px;
   background: var(--color-border);
-  border-radius: 3px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
 .score-bar__fill {
   height: 100%;
-  border-radius: 3px;
-  transition: width 0.3s ease;
+  border-radius: var(--radius-pill);
+  transition: width var(--duration-base) var(--ease-standard);
 }
 
 .score-bar__label {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-strong);
   min-width: 40px;
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 </style>
