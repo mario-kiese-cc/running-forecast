@@ -85,9 +85,25 @@ describe("scoreTemperature", () => {
     expect(scoreTemperature(-10)).toBe(0);
   });
 
-  it("should return 0 at or above 35°C", () => {
+  it("should return 0 at or above 28°C (heat is unrunnable for quality)", () => {
+    expect(scoreTemperature(28)).toBe(0);
     expect(scoreTemperature(35)).toBe(0);
     expect(scoreTemperature(40)).toBe(0);
+  });
+
+  it("should taper gently from 18–20°C (still pleasant)", () => {
+    // 19°C is halfway between 18 (100) and 20 (80) → 90
+    expect(scoreTemperature(19)).toBeCloseTo(90, 0);
+    expect(scoreTemperature(20)).toBeCloseTo(80, 0);
+  });
+
+  it("should drop steeply above 20°C so warm hours rank below cool ones", () => {
+    // 24°C: halfway between 20 (80) and 28 (0) → 40
+    expect(scoreTemperature(24)).toBeCloseTo(40, 0);
+    // 25°C should score noticeably lower than 20°C
+    expect(scoreTemperature(25)).toBeLessThan(scoreTemperature(20) - 25);
+    // A cool 15°C should clearly beat a warm 25°C
+    expect(scoreTemperature(15)).toBeGreaterThan(scoreTemperature(25) + 50);
   });
 
   it("should degrade linearly below ideal range", () => {
@@ -96,11 +112,7 @@ describe("scoreTemperature", () => {
     expect(score).toBeCloseTo(50, 0);
   });
 
-  it("should degrade linearly above ideal range", () => {
-    // Midpoint between 18 and 35 is 26.5°C → ~50
-    const score = scoreTemperature(26.5);
-    expect(score).toBeCloseTo(50, 0);
-  });
+
 });
 
 // --- Wind ---
@@ -254,11 +266,24 @@ describe("computeOverallScore", () => {
     expect(score).toBe(0);
   });
 
-  it("should weight precipitation highest (30%)", () => {
+  it("should weight precipitation at 30%", () => {
     // Only precipitation is bad → score drops by 30 points
     const score = computeOverallScore({
       precipitation: 0,
       temperature: 100,
+      wind: 100,
+      humidity: 100,
+      airQuality: 100,
+      daylight: 100,
+    });
+    expect(score).toBe(70);
+  });
+
+  it("should weight temperature at 30% (heat hits the overall score hard)", () => {
+    // Only temperature is bad → score drops by 30 points
+    const score = computeOverallScore({
+      precipitation: 100,
+      temperature: 0,
       wind: 100,
       humidity: 100,
       airQuality: 100,

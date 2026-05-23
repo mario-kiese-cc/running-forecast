@@ -11,8 +11,8 @@ import type {
  */
 const WEIGHTS = {
   precipitation: 0.3,
-  temperature: 0.25,
-  wind: 0.15,
+  temperature: 0.3,
+  wind: 0.1,
   humidity: 0.1,
   airQuality: 0.1,
   daylight: 0.1,
@@ -46,14 +46,22 @@ export function scorePrecipitation(
 /**
  * Score temperature conditions (0–100).
  * Ideal "feels like" range: 8–18°C (score 100).
- * Degrades linearly outside that range.
- * Unrunnable below -5°C or above 35°C.
+ *
+ * Cold side: linear decline to 0 at -5°C.
+ *
+ * Warm side: two-segment decline reflecting that heat impacts running
+ * performance disproportionately more than equivalent cold.
+ *   - 18 → 20°C: gentle taper 100 → 80 (warm but still pleasant)
+ *   - 20 → 28°C: steep decline 80 → 0 (every degree noticeably hurts)
+ *   - ≥28°C: 0 (effectively unrunnable for quality work)
  */
 export function scoreTemperature(apparentTempCelsius: number): number {
   const IDEAL_LOW = 8;
   const IDEAL_HIGH = 18;
   const EXTREME_LOW = -5;
-  const EXTREME_HIGH = 35;
+  const WARM_THRESHOLD = 20;
+  const WARM_SCORE = 80;
+  const EXTREME_HIGH = 28;
 
   if (apparentTempCelsius >= IDEAL_LOW && apparentTempCelsius <= IDEAL_HIGH) {
     return 100;
@@ -65,10 +73,20 @@ export function scoreTemperature(apparentTempCelsius: number): number {
     return Math.max(0, 100 - (distance / range) * 100);
   }
 
-  // apparentTempCelsius > IDEAL_HIGH
-  const range = EXTREME_HIGH - IDEAL_HIGH;
-  const distance = apparentTempCelsius - IDEAL_HIGH;
-  return Math.max(0, 100 - (distance / range) * 100);
+  // Warm zone: gentle taper from IDEAL_HIGH to WARM_THRESHOLD
+  if (apparentTempCelsius <= WARM_THRESHOLD) {
+    const range = WARM_THRESHOLD - IDEAL_HIGH;
+    const distance = apparentTempCelsius - IDEAL_HIGH;
+    return 100 - (distance / range) * (100 - WARM_SCORE);
+  }
+
+  // Hot zone: steep decline from WARM_THRESHOLD to EXTREME_HIGH
+  if (apparentTempCelsius >= EXTREME_HIGH) {
+    return 0;
+  }
+  const range = EXTREME_HIGH - WARM_THRESHOLD;
+  const distance = apparentTempCelsius - WARM_THRESHOLD;
+  return WARM_SCORE - (distance / range) * WARM_SCORE;
 }
 
 /**

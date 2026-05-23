@@ -6,6 +6,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **Run scoring — sharper heat penalty:** temperature weight raised from 0.25 → 0.30 (taken from wind, 0.15 → 0.10), and the warm-side curve in `scoreTemperature` is now two-segment: gentle 18–20°C taper (100 → 80) followed by a steep 20–28°C decline (80 → 0). Hours above 20°C now drop noticeably in the overall score so cooler hours rank clearly higher (e.g. an otherwise-perfect 25°C hour now scores ~79 instead of ~90).
+
 ### Added
 - **GitHub Pages deployment:** `.github/workflows/deploy.yml` builds, tests, and deploys `dist/` to GitHub Pages on every push to `main`. Site URL: https://mario-kiese-cc.github.io/running-forecast/
 
