@@ -6,6 +6,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **Manual re-detect button:** the location badge now exposes a “Use my current location” button (crosshair icon) that re-triggers the browser Geolocation API on demand. Useful when you’ve moved to a different city and want the forecast to follow. Detection is non-destructive — if the user denies or the request fails, the previously set location stays put and an inline error is shown under the badge. New composable API: `detectLocation()`, `detectionStatus`, `detectionError` on `useLocation`.
+
 ### Changed
 - **Run scoring — sharper heat penalty:** temperature weight raised from 0.25 → 0.30 (taken from wind, 0.15 → 0.10), and the warm-side curve in `scoreTemperature` is now two-segment: gentle 18–20°C taper (100 → 80) followed by a steep 20–28°C decline (80 → 0). Hours above 20°C now drop noticeably in the overall score so cooler hours rank clearly higher (e.g. an otherwise-perfect 25°C hour now scores ~79 instead of ~90).
 

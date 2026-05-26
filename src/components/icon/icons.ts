@@ -20,6 +20,7 @@ export type IconName =
   | "rain"
   | "haze"
   | "location"
+  | "crosshair"
   | "moon"
   | "refresh"
   | "alert";
@@ -47,6 +48,13 @@ export const ICONS: Record<IconName, string> = {
   location:
     '<path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12Z"/>' +
     '<circle cx="12" cy="9" r="2.5"/>',
+  crosshair:
+    '<circle cx="12" cy="12" r="8"/>' +
+    '<circle cx="12" cy="12" r="2.5"/>' +
+    '<path d="M12 2v3"/>' +
+    '<path d="M12 19v3"/>' +
+    '<path d="M2 12h3"/>' +
+    '<path d="M19 12h3"/>',
   moon:
     '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>',
   refresh:

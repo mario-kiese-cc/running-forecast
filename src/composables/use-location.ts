@@ -10,6 +10,13 @@ import { reverseGeocode } from "../services/reverse-geocoding-service";
 export type LocationStatus = "loading" | "ready" | "prompt" | "error";
 
 /**
+ * Status of a user-triggered re-detection. Kept separate from the main
+ * `status` so re-detection does not flip the whole app back to a loading
+ * skeleton.
+ */
+export type DetectionStatus = "idle" | "detecting" | "error";
+
+/**
  * If the location has no `name`, look up a nearest-city label via reverse
  * geocoding. Returns the original location unchanged on failure or when a
  * name is already present. Pure with respect to its inputs aside from the
@@ -35,11 +42,17 @@ async function enrichWithCityName(
  * On mount, tries to load from localStorage.
  * If nothing saved, tries browser geolocation.
  * If that fails, sets status to "prompt" so the UI can show a manual input.
+ *
+ * Exposes `detectLocation()` so the user can explicitly re-trigger the
+ * browser Geolocation API at any time (e.g. after moving cities).
  */
 export function useLocation() {
   const location = ref<UserLocation | null>(null);
   const status = ref<LocationStatus>("loading");
   const errorMessage = ref<string | null>(null);
+
+  const detectionStatus = ref<DetectionStatus>("idle");
+  const detectionError = ref<string | null>(null);
 
   onMounted(async () => {
     // Try localStorage first
@@ -98,6 +111,53 @@ export function useLocation() {
     saveLocation(stamped);
     status.value = "ready";
     errorMessage.value = null;
+    // A successful manual set supersedes any prior detection error.
+    detectionStatus.value = "idle";
+    detectionError.value = null;
+  }
+
+  /**
+   * Re-trigger the browser Geolocation API and replace the current
+   * location with the result. Independent of the initial-mount flow.
+   *
+   * Safe to call from any state; does nothing destructive on failure
+   * (the existing location stays put and `detectionError` is set).
+   */
+  async function detectLocation(): Promise<void> {
+    // Snapshot the active location so a concurrent manual set during the
+    // request doesn't get clobbered by a stale geolocation result.
+    const before = location.value;
+    detectionStatus.value = "detecting";
+    detectionError.value = null;
+
+    try {
+      const geo = await requestGeolocation();
+
+      // If the user manually set a different location while we were
+      // waiting, honour that and drop our result on the floor.
+      if (location.value !== before && location.value !== null) {
+        const current = location.value;
+        const movedDeliberately =
+          current.latitude !== before?.latitude ||
+          current.longitude !== before?.longitude;
+        if (movedDeliberately) {
+          detectionStatus.value = "idle";
+          return;
+        }
+      }
+
+      location.value = geo;
+      saveLocation(geo);
+      status.value = "ready";
+      errorMessage.value = null;
+      detectionStatus.value = "idle";
+      // Enrich asynchronously — guarded against further changes internally.
+      void enrichAndPersist(geo);
+    } catch (error) {
+      detectionError.value =
+        error instanceof Error ? error.message : "Location unavailable";
+      detectionStatus.value = "error";
+    }
   }
 
   return {
@@ -105,5 +165,8 @@ export function useLocation() {
     status,
     errorMessage,
     setManualLocation,
+    detectLocation,
+    detectionStatus,
+    detectionError,
   };
 }

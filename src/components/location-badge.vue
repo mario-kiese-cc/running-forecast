@@ -3,12 +3,20 @@ import { computed } from "vue";
 import type { UserLocation } from "../types";
 import Icon from "./icon/icon.vue";
 
-const props = defineProps<{
-  location: UserLocation;
-}>();
+const props = withDefaults(
+  defineProps<{
+    location: UserLocation;
+    /** True while a user-triggered re-detection is in flight. */
+    isDetecting?: boolean;
+    /** Error message from the most recent detection attempt, if any. */
+    detectionError?: string | null;
+  }>(),
+  { isDetecting: false, detectionError: null },
+);
 
 defineEmits<{
   change: [];
+  detect: [];
 }>();
 
 const displayName = computed(() => {
@@ -29,32 +37,60 @@ const sourceLabel = computed(() => {
 
 <template>
   <div class="location-badge">
-    <span class="location-badge__pill">
-      <Icon name="location" :size="14" class="location-badge__icon" />
-      <span
-        class="location-badge__name"
-        :class="{ 'location-badge__name--placeholder': isResolvingCity }"
-      >{{ displayName }}</span>
-      <span
-        v-if="sourceLabel"
-        class="location-badge__source"
-        :class="`location-badge__source--${sourceLabel}`"
-      >
-        {{ sourceLabel }}
+    <div class="location-badge__row">
+      <span class="location-badge__pill">
+        <Icon name="location" :size="14" class="location-badge__icon" />
+        <span
+          class="location-badge__name"
+          :class="{ 'location-badge__name--placeholder': isResolvingCity }"
+        >{{ displayName }}</span>
+        <span
+          v-if="sourceLabel"
+          class="location-badge__source"
+          :class="`location-badge__source--${sourceLabel}`"
+        >
+          {{ sourceLabel }}
+        </span>
       </span>
-    </span>
-    <button
-      type="button"
-      class="location-badge__change"
-      @click="$emit('change')"
+      <button
+        type="button"
+        class="location-badge__action"
+        :disabled="isDetecting"
+        :aria-label="isDetecting ? 'Detecting your location' : 'Use my current location'"
+        :title="isDetecting ? 'Detecting…' : 'Use my current location'"
+        @click="$emit('detect')"
+      >
+        <Icon name="crosshair" :size="14" />
+        <span>{{ isDetecting ? 'Detecting…' : 'Use my current location' }}</span>
+      </button>
+      <button
+        type="button"
+        class="location-badge__action"
+        @click="$emit('change')"
+      >
+        Change
+      </button>
+    </div>
+    <p
+      v-if="detectionError"
+      class="location-badge__error"
+      role="status"
     >
-      Change
-    </button>
+      Couldn’t detect your location: {{ detectionError }}
+    </p>
   </div>
 </template>
 
 <style scoped>
 .location-badge {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.location-badge__row {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -115,7 +151,10 @@ const sourceLabel = computed(() => {
   background: color-mix(in srgb, var(--color-rating-fair) 10%, transparent);
 }
 
-.location-badge__change {
+.location-badge__action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   padding: var(--space-1) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
@@ -130,9 +169,20 @@ const sourceLabel = computed(() => {
     border-color var(--duration-fast) var(--ease-standard);
 }
 
-.location-badge__change:hover {
+.location-badge__action:hover:not(:disabled) {
   background: var(--color-surface-elevated);
   color: var(--color-text);
   border-color: var(--color-border-strong);
+}
+
+.location-badge__action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.location-badge__error {
+  font-size: var(--font-size-sm);
+  color: var(--color-rating-avoid);
+  margin-top: var(--space-1);
 }
 </style>

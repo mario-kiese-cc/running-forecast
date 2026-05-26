@@ -9,7 +9,14 @@ import LocationBadge from "./components/location-badge.vue";
 import Icon from "./components/icon/icon.vue";
 import type { UserLocation } from "./types";
 
-const { location, status: locationStatus, setManualLocation } = useLocation();
+const {
+  location,
+  status: locationStatus,
+  setManualLocation,
+  detectLocation,
+  detectionStatus,
+  detectionError,
+} = useLocation();
 const { slots, status: weatherStatus, errorMessage, refresh } =
   useWeather(location);
 
@@ -40,6 +47,14 @@ function handleChangeLocation(): void {
 function handleCancelChange(): void {
   isChangingLocation.value = false;
 }
+
+async function handleDetectLocation(): Promise<void> {
+  await detectLocation();
+  // Auto-close the manual prompt if it was open and detection succeeded.
+  if (detectionStatus.value === "idle") {
+    isChangingLocation.value = false;
+  }
+}
 </script>
 
 <template>
@@ -58,7 +73,13 @@ function handleCancelChange(): void {
     <template v-else-if="locationStatus === 'ready' || locationStatus === 'prompt'">
       <!-- Toolbar: badge + refresh (only when a location is set) -->
       <div v-if="location" class="app__toolbar">
-        <LocationBadge :location="location" @change="handleChangeLocation" />
+        <LocationBadge
+          :location="location"
+          :is-detecting="detectionStatus === 'detecting'"
+          :detection-error="detectionError"
+          @change="handleChangeLocation"
+          @detect="handleDetectLocation"
+        />
         <button
           class="app__refresh"
           :disabled="weatherStatus === 'loading'"

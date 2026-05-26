@@ -38,3 +38,4 @@
 <!-- - [x] (2025-05-21) Set up project harness and agent instructions -->
 - [x] (2026-05-22) Dark theme + remove decorative emoji + establish design system (`docs/design-system.md`, ADR-004)
 - [x] (2026-05-22) GitHub Pages deployment via GitHub Actions
+- [x] (2026-05-26) Manual “Use my current location” re-detect button in `LocationBadge` (`docs/plans/manual-trigger-auto-relocation.md`)
