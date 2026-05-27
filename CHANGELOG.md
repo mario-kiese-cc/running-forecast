@@ -7,6 +7,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **App logo in header:** the stadium-track mark now appears next to the “Running Forecast” title (`src/components/app-logo.vue`). Colors come from design tokens so the mark stays in sync with the theme.
 - **App icon (favicon):** geometric stadium-track mark (`public/favicon.svg`). Single SVG, theme-aware via `prefers-color-scheme` so it stays legible on both dark and light browser chrome. Outer pill in foreground color, inner lane in the cyan accent. Wired into `index.html` via `<link rel="icon" type="image/svg+xml">`.
 
 ### Added

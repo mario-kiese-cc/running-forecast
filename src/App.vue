@@ -6,6 +6,7 @@ import { buildDayForecasts, getTodayString } from "./services/slot-builder";
 import TimelineView from "./components/timeline-view.vue";
 import LocationPrompt from "./components/location-prompt.vue";
 import LocationBadge from "./components/location-badge.vue";
+import AppLogo from "./components/app-logo.vue";
 import Icon from "./components/icon/icon.vue";
 import type { UserLocation } from "./types";
 
@@ -60,7 +61,10 @@ async function handleDetectLocation(): Promise<void> {
 <template>
   <main class="app">
     <header class="app__header">
-      <h1 class="app__title">Running Forecast</h1>
+      <div class="app__brand">
+        <AppLogo :size="32" class="app__logo" />
+        <h1 class="app__title">Running Forecast</h1>
+      </div>
       <p class="app__subtitle">Find the best time to run</p>
     </header>
 
@@ -152,6 +156,18 @@ body {
 
 .app__header {
   margin-bottom: var(--space-5);
+}
+
+.app__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.app__logo {
+  /* Optical alignment: nudge down a hair so the track sits on the title's
+     baseline rather than its cap height. */
+  margin-top: 2px;
 }
 
 .app__title {
