@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!--
+    B — Stadium track outline
+    The pill shape of an athletics track viewed from above. One thick stroke.
+    Inner lane line adds depth without clutter — drop it if it muddles 16×16.
+  -->
+  <style>
+    .stroke       { stroke: #e8eef5; }
+    .stroke-accent { stroke: #22d3ee; }
+    @media (prefers-color-scheme: light) {
+      .stroke        { stroke: #0b0d10; }
+      .stroke-accent { stroke: #06b6d4; }
+    }
+  </style>
+  <!-- Outer track (pill) -->
+  <rect class="stroke" x="3" y="9" width="26" height="14" rx="7" ry="7"
+        stroke-width="3" />
+  <!-- Inner lane (accent), slightly inset -->
+  <rect class="stroke-accent" x="8" y="13" width="16" height="6" rx="3" ry="3"
+        stroke-width="1.75" opacity="0.85" />
+</svg>

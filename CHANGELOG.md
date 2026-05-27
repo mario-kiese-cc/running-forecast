@@ -7,6 +7,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **App icon (favicon):** geometric stadium-track mark (`public/favicon.svg`). Single SVG, theme-aware via `prefers-color-scheme` so it stays legible on both dark and light browser chrome. Outer pill in foreground color, inner lane in the cyan accent. Wired into `index.html` via `<link rel="icon" type="image/svg+xml">`.
+
+### Added
 - **Manual re-detect button:** the location badge now exposes a “Use my current location” button (crosshair icon) that re-triggers the browser Geolocation API on demand. Useful when you’ve moved to a different city and want the forecast to follow. Detection is non-destructive — if the user denies or the request fails, the previously set location stays put and an inline error is shown under the badge. New composable API: `detectLocation()`, `detectionStatus`, `detectionError` on `useLocation`.
 
 ### Changed
