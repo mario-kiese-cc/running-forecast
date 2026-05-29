@@ -7,6 +7,28 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Multi-day comparison view (Week heatmap):** a new view toggle above the forecast switches between **Timeline** (the existing ranked hourly cards) and **Week** — a colour-coded grid of days × hours so you can compare slots across the whole forecast horizon at a glance (e.g. is Saturday or Sunday morning better for the long run?). Cells reuse the rating palette; past hours are de-emphasised and non-interactive, nighttime hours are subtly desaturated, and the single best future hour gets an accent ring. Hover or keyboard-focus shows a condensed popover (time, score, rating, conditions); clicking a cell jumps to the Timeline and pulses the matching card. The grid is a `role="grid"` with arrow-key navigation, scrolls horizontally on mobile with a sticky day-label column, and the view choice persists in `localStorage`. It reuses the same scored slots, so profile / run-type changes re-colour it instantly with no network refetch. New files: `src/services/week-grid.ts`, `src/services/view-mode.ts`, `src/composables/use-view-mode.ts`, `src/components/view-mode-toggle.vue`, `week-grid-view.vue`, `week-grid-cell.vue`, `week-grid-popover.vue`, `week-grid-legend.vue`, plus `list` / `grid` icons. See [ADR-007](docs/decisions/007-week-grid-view.md).
+
+### Changed
+- **Forecast horizon extended from 2 to 7 days** (`FORECAST_DAYS`) to power the Week view; the Timeline now also spans the full week.
+- `day-label` gains `weekdayLabel` / `gridDayLabel` for localised short weekday names (e.g. "Wed") used by the Week grid.
+- `time-slot-card` accepts a `highlighted` prop and exposes a `data-time` anchor so the Timeline can scroll-to and pulse a deep-linked slot (respecting `prefers-reduced-motion`).
+
+### Added
+- **Run-type aware scoring:** pick one of five run types (Easy, Long, Tempo, Intervals, Recovery) from a segmented selector above the timeline. Each run type adjusts the active personal profile via multiplicative weight factors and an additive ideal-temperature shift, then re-scores the visible forecast instantly with no network refetch. Recovery additionally softens the `good` rating threshold (60 → 50) so most non-rainy slots qualify. Selection persists in `localStorage`; default is Easy. The selector is keyboard-operable (arrow keys + Home/End), screen-reader-announced (`role="radiogroup"` + `aria-checked`), and renders an icon + label per option with a one-line caption describing the active choice. New files: `src/services/run-type.ts`, `src/composables/use-run-type.ts`, `src/components/run-type-selector.vue`, plus five run-type icons in `src/components/icon/icons.ts`. See [ADR-006](docs/decisions/006-run-type-modifiers.md).
+
+### Changed
+- `ScoringProfile` gains an optional `goodThresholdOverride` field, only ever set by `applyRunTypeModifier` and explicitly stripped by `withCustomEdit` so it never persists on a personal profile.
+- `scoreToRating` accepts an optional `RatingThresholdOverrides` argument; the override is clamped within the surrounding thresholds.
+
+### Added
+- **Personal scoring profiles:** the forecast can now be tuned to the runner instead of one global default. Pick from five presets (Default, Heat-sensitive, Cold-averse, Winter runner, Urban air quality) or customise the per-factor weights, ideal apparent-temperature range, and darkness tolerance. The active profile lives in a header pill; clicking it opens a settings panel that re-scores the visible timeline live, with no network refetch. Profiles persist in `localStorage` (schema-versioned, with graceful fallback to Default on invalid data). New files: `src/services/scoring-profile.ts`, `src/services/scoring-profile-presets.ts`, `src/composables/use-scoring-profile.ts`, plus `ProfilePill`, `ProfilePanel`, `ProfilePresetList`, `ProfileWeightsEditor`, `ProfileRangeEditor`. See [ADR-005](docs/decisions/005-scoring-profile-model.md).
+
+### Changed
+- **`run-scorer` is now profile-aware:** `scoreTemperature` accepts an ideal range, `scoreDaylight` accepts a darkness score, and `scoreHour` / `scoreAllHours` / `computeFactors` / `computeOverallScore` accept a `ScoringProfile` (default-parameterised so existing callers stay byte-compatible).
+- **`useWeather` reactivity:** raw hourly data is now cached separately from scored slots; `slots` is a `computed` over `(rawHourly, profile)` so profile changes recompute instantly without re-fetching from Open-Meteo.
+
+### Added
 - **App logo in header:** the stadium-track mark now appears next to the “Running Forecast” title (`src/components/app-logo.vue`). Colors come from design tokens so the mark stays in sync with the theme.
 - **App icon (favicon):** geometric stadium-track mark (`public/favicon.svg`). Single SVG, theme-aware via `prefers-color-scheme` so it stays legible on both dark and light browser chrome. Outer pill in foreground color, inner lane in the cyan accent. Wired into `index.html` via `<link rel="icon" type="image/svg+xml">`.
 

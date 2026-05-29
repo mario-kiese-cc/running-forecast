@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, watch } from "vue";
 import type { DayForecast } from "../services/slot-builder";
 import { formatWindowRange } from "../services/format-window";
 import TimeSlotCard from "./time-slot-card.vue";
@@ -7,11 +8,39 @@ import Icon from "./icon/icon.vue";
 const props = defineProps<{
   forecasts: DayForecast[];
   today: string;
+  /** ISO time of a slot to scroll to and pulse (deep-link from Week view). */
+  highlightTime?: string | null;
 }>();
+
+const root = ref<HTMLElement | null>(null);
+
+const prefersReducedMotion =
+  typeof window !== "undefined" &&
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+/**
+ * When a deep-link target arrives, scroll the matching card into view.
+ * The pulse itself is driven by the `highlighted` prop + CSS animation.
+ */
+watch(
+  () => props.highlightTime,
+  async (time) => {
+    if (!time) return;
+    await Promise.resolve();
+    const card = root.value?.querySelector<HTMLElement>(
+      `[data-time="${time}"]`,
+    );
+    card?.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "center",
+    });
+  },
+  { flush: "post" },
+);
 </script>
 
 <template>
-  <div class="timeline">
+  <div ref="root" class="timeline">
     <section
       v-for="day in props.forecasts"
       :key="day.date"
@@ -50,6 +79,7 @@ const props = defineProps<{
           v-for="slot in day.slots"
           :key="slot.time"
           :slot="slot"
+          :highlighted="slot.time === props.highlightTime"
         />
       </div>
     </section>

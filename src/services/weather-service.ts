@@ -51,7 +51,9 @@ const FORECAST_PARAMS = [
 ].join(",");
 
 const DAILY_PARAMS = "sunrise,sunset";
-const FORECAST_DAYS = 2;
+// Seven days powers the Week heatmap (week-at-a-glance). The Timeline view
+// renders whatever days are returned, so it now spans the full week too.
+const FORECAST_DAYS = 7;
 
 // --- URL builders ---
 

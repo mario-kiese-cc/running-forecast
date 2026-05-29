@@ -7,6 +7,8 @@ import ConditionBadge from "./condition-badge.vue";
 
 const props = defineProps<{
   slot: TimeSlot;
+  /** When true, briefly pulses to draw attention (deep-link from Week view). */
+  highlighted?: boolean;
 }>();
 
 const isNight = computed(() => isUnsociableHour(props.slot.time));
@@ -40,8 +42,9 @@ function formatPrecip(probability: number): string {
     class="slot-card"
     :class="[
       `slot-card--${props.slot.rating}`,
-      { 'slot-card--night': isNight },
+      { 'slot-card--night': isNight, 'slot-card--highlight': props.highlighted },
     ]"
+    :data-time="props.slot.time"
   >
     <div class="slot-card__header">
       <span class="slot-card__time">{{ formatHour(props.slot.time) }}</span>
@@ -110,6 +113,28 @@ function formatPrecip(probability: number): string {
 .slot-card--night {
   opacity: 0.55;
   border-left-color: var(--color-border);
+}
+
+/* Deep-link highlight: a brief outline pulse (FR-7, NFR-3). */
+.slot-card--highlight {
+  animation: slot-card-pulse 1.5s var(--ease-standard);
+}
+
+@keyframes slot-card-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  20% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 45%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slot-card--highlight {
+    animation: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 45%, transparent);
+  }
 }
 
 .slot-card__header {

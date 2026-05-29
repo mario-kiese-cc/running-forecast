@@ -32,7 +32,7 @@ describe("buildForecastUrl", () => {
     expect(url).toContain("sunrise");
     expect(url).toContain("sunset");
     expect(url).toContain("timezone=auto");
-    expect(url).toContain("forecast_days=2");
+    expect(url).toContain("forecast_days=7");
   });
 });
 

@@ -2,13 +2,23 @@
 import { computed, ref } from "vue";
 import { useLocation } from "./composables/use-location";
 import { useWeather } from "./composables/use-weather";
+import { useScoringProfile } from "./composables/use-scoring-profile";
+import { useRunType } from "./composables/use-run-type";
+import { applyRunTypeModifier } from "./services/run-type";
 import { buildDayForecasts, getTodayString } from "./services/slot-builder";
+import { buildWeekGrid } from "./services/week-grid";
+import { useViewMode } from "./composables/use-view-mode";
 import TimelineView from "./components/timeline-view.vue";
+import WeekGridView from "./components/week-grid-view.vue";
+import ViewModeToggle from "./components/view-mode-toggle.vue";
 import LocationPrompt from "./components/location-prompt.vue";
 import LocationBadge from "./components/location-badge.vue";
 import AppLogo from "./components/app-logo.vue";
 import Icon from "./components/icon/icon.vue";
-import type { UserLocation } from "./types";
+import ProfilePill from "./components/profile-pill.vue";
+import ProfilePanel from "./components/profile-panel.vue";
+import RunTypeSelector from "./components/run-type-selector.vue";
+import type { ScoringProfile, UserLocation } from "./types";
 
 const {
   location,
@@ -18,8 +28,39 @@ const {
   detectionStatus,
   detectionError,
 } = useLocation();
+const {
+  profile,
+  setPreset,
+  updateWeight,
+  updateIdealRange,
+  updateDarknessScore,
+  reset: resetProfile,
+} = useScoringProfile();
+const { runType, setRunType } = useRunType();
+const { viewMode, setViewMode } = useViewMode();
+
+/**
+ * Effective profile = personal profile composed with the run-type
+ * modifier. Both refs are reactive, so this re-runs and re-scores the
+ * forecast whenever either changes (no network refetch — see ADR-005 /
+ * ADR-006).
+ */
+const effectiveProfile = computed<ScoringProfile>(() =>
+  applyRunTypeModifier(profile.value, runType.value),
+);
+
 const { slots, status: weatherStatus, errorMessage, refresh } =
-  useWeather(location);
+  useWeather(location, effectiveProfile);
+
+const isProfilePanelOpen = ref(false);
+
+function openProfilePanel(): void {
+  isProfilePanelOpen.value = true;
+}
+
+function closeProfilePanel(): void {
+  isProfilePanelOpen.value = false;
+}
 
 const today = computed(() => getTodayString());
 
@@ -27,6 +68,28 @@ const forecasts = computed(() => {
   if (slots.value.length === 0) return [];
   return buildDayForecasts(slots.value, today.value);
 });
+
+const weekRows = computed(() => {
+  if (slots.value.length === 0) return [];
+  return buildWeekGrid(slots.value, new Date());
+});
+
+/**
+ * ISO time a deep-link from the Week view wants the Timeline to scroll to
+ * and pulse. Cleared after the pulse so re-selecting the same slot fires
+ * again.
+ */
+const highlightTime = ref<string | null>(null);
+let highlightTimer: ReturnType<typeof setTimeout> | undefined;
+
+function handleSelectSlot(time: string): void {
+  setViewMode("timeline");
+  highlightTime.value = time;
+  clearTimeout(highlightTimer);
+  highlightTimer = setTimeout(() => {
+    highlightTime.value = null;
+  }, 1600);
+}
 
 /** User-initiated request to change an already-set location. */
 const isChangingLocation = ref(false);
@@ -64,9 +127,27 @@ async function handleDetectLocation(): Promise<void> {
       <div class="app__brand">
         <AppLogo :size="32" class="app__logo" />
         <h1 class="app__title">Running Forecast</h1>
+        <ProfilePill
+          class="app__profile-pill"
+          :profile="profile"
+          @open="openProfilePanel"
+        />
       </div>
       <p class="app__subtitle">Find the best time to run</p>
     </header>
+
+    <RunTypeSelector :run-type="runType" @select="setRunType" />
+
+    <ProfilePanel
+      v-if="isProfilePanelOpen"
+      :profile="profile"
+      @close="closeProfilePanel"
+      @select-preset="setPreset"
+      @update-weight="updateWeight"
+      @update-ideal-range="updateIdealRange"
+      @update-darkness="updateDarknessScore"
+      @reset="resetProfile"
+    />
 
     <!-- Loading location -->
     <div v-if="locationStatus === 'loading'" class="app__status">
@@ -116,11 +197,27 @@ async function handleDetectLocation(): Promise<void> {
           <button class="app__refresh" @click="refresh">Try again</button>
         </div>
 
-        <TimelineView
-          v-else-if="weatherStatus === 'ready'"
-          :forecasts="forecasts"
-          :today="today"
-        />
+        <template v-else-if="weatherStatus === 'ready'">
+          <ViewModeToggle
+            class="app__view-toggle"
+            :view-mode="viewMode"
+            @select="setViewMode"
+          />
+
+          <!-- Both views stay mounted (v-show) so each keeps its own scroll
+               position when toggling (acceptance criteria). -->
+          <TimelineView
+            v-show="viewMode === 'timeline'"
+            :forecasts="forecasts"
+            :today="today"
+            :highlight-time="highlightTime"
+          />
+          <WeekGridView
+            v-show="viewMode === 'week'"
+            :rows="weekRows"
+            @select-slot="handleSelectSlot"
+          />
+        </template>
       </template>
     </template>
   </main>
@@ -161,7 +258,12 @@ body {
 .app__brand {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+.app__profile-pill {
+  margin-left: auto;
 }
 
 .app__logo {
@@ -217,6 +319,10 @@ body {
 .app__refresh:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.app__view-toggle {
+  margin-bottom: var(--space-4);
 }
 
 .app__status {

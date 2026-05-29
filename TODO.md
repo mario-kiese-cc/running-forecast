@@ -39,3 +39,6 @@
 - [x] (2026-05-22) Dark theme + remove decorative emoji + establish design system (`docs/design-system.md`, ADR-004)
 - [x] (2026-05-22) GitHub Pages deployment via GitHub Actions
 - [x] (2026-05-26) Manual “Use my current location” re-detect button in `LocationBadge` (`docs/plans/manual-trigger-auto-relocation.md`)
+- [x] (2026-05-29) Personal scoring profiles — five presets + custom weights + persistence + settings panel (`docs/plans/personal-scoring-profiles.md`, ADR-005)
+- [x] (2026-05-29) Multi-day comparison view — Week heatmap (days × hours) with view toggle, deep-link to Timeline, keyboard grid nav, popover, best-cell ring, sticky mobile column, and `localStorage` view-mode persistence; forecast horizon raised to 7 days (`docs/plans/multi-day-comparison-view.md`, ADR-007)
+- [x] (2026-05-29) Run-type aware scoring — five run types compose on top of the personal profile with weight multipliers + ideal-temperature shift + recovery threshold override (`docs/plans/run-type-aware-scoring.md`, ADR-006)
