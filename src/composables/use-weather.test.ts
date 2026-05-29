@@ -1,9 +1,13 @@
 import { describe, it, expect, vi } from "vitest";
 import { ref, nextTick } from "vue";
 import { useWeather } from "./use-weather";
-import type { UserLocation } from "../types";
+import type { ScoringProfile, UserLocation } from "../types";
 import sampleWeather from "../../data/sample-weather.json";
 import sampleAirQuality from "../../data/sample-air-quality.json";
+import {
+  BUILT_IN_PROFILES,
+  DEFAULT_PROFILE,
+} from "../services/scoring-profile-presets";
 
 /**
  * @vitest-environment jsdom
@@ -36,7 +40,8 @@ function createSuccessFetch(): ReturnType<typeof vi.fn> {
 describe("useWeather", () => {
   it("should start as idle when location is null", () => {
     const location = ref<UserLocation | null>(null);
-    const { status, slots } = useWeather(location, vi.fn());
+    const profile = ref<ScoringProfile>(DEFAULT_PROFILE);
+    const { status, slots } = useWeather(location, profile, vi.fn());
 
     expect(status.value).toBe("idle");
     expect(slots.value).toEqual([]);
@@ -44,8 +49,9 @@ describe("useWeather", () => {
 
   it("should fetch and score when location becomes available", async () => {
     const location = ref<UserLocation | null>(null);
+    const profile = ref<ScoringProfile>(DEFAULT_PROFILE);
     const mockFetch = createSuccessFetch();
-    const { status, slots } = useWeather(location, mockFetch);
+    const { status, slots } = useWeather(location, profile, mockFetch);
 
     // Set location — triggers watch
     location.value = VIENNA;
@@ -64,8 +70,9 @@ describe("useWeather", () => {
 
   it("should fetch immediately when location is provided at creation", async () => {
     const location = ref<UserLocation | null>(VIENNA);
+    const profile = ref<ScoringProfile>(DEFAULT_PROFILE);
     const mockFetch = createSuccessFetch();
-    const { status, slots } = useWeather(location, mockFetch);
+    const { status, slots } = useWeather(location, profile, mockFetch);
 
     await vi.waitFor(() => {
       expect(status.value).toBe("ready");
@@ -76,11 +83,12 @@ describe("useWeather", () => {
 
   it("should set error status when forecast API fails", async () => {
     const location = ref<UserLocation | null>(VIENNA);
+    const profile = ref<ScoringProfile>(DEFAULT_PROFILE);
     const mockFetch = vi.fn()
       .mockResolvedValueOnce(mockResponse(null, false, 500))
       .mockResolvedValueOnce(mockResponse(sampleAirQuality));
 
-    const { status, errorMessage } = useWeather(location, mockFetch);
+    const { status, errorMessage } = useWeather(location, profile, mockFetch);
 
     await vi.waitFor(() => {
       expect(status.value).toBe("error");
@@ -91,8 +99,9 @@ describe("useWeather", () => {
 
   it("should support manual refresh", async () => {
     const location = ref<UserLocation | null>(VIENNA);
+    const profile = ref<ScoringProfile>(DEFAULT_PROFILE);
     const mockFetch = createSuccessFetch();
-    const { status, refresh, slots } = useWeather(location, mockFetch);
+    const { status, refresh, slots } = useWeather(location, profile, mockFetch);
 
     await vi.waitFor(() => {
       expect(status.value).toBe("ready");
@@ -108,8 +117,9 @@ describe("useWeather", () => {
 
   it("should record lastFetchedAt on success", async () => {
     const location = ref<UserLocation | null>(VIENNA);
+    const profile = ref<ScoringProfile>(DEFAULT_PROFILE);
     const mockFetch = createSuccessFetch();
-    const { status, lastFetchedAt } = useWeather(location, mockFetch);
+    const { status, lastFetchedAt } = useWeather(location, profile, mockFetch);
 
     expect(lastFetchedAt.value).toBeNull();
 
@@ -120,5 +130,27 @@ describe("useWeather", () => {
     expect(lastFetchedAt.value).not.toBeNull();
     // Should be a valid ISO date
     expect(new Date(lastFetchedAt.value!).getTime()).not.toBeNaN();
+  });
+
+  it("should re-score slots when the profile ref changes", async () => {
+    const location = ref<UserLocation | null>(VIENNA);
+    const profile = ref<ScoringProfile>(DEFAULT_PROFILE);
+    const mockFetch = createSuccessFetch();
+    const { status, slots } = useWeather(location, profile, mockFetch);
+
+    await vi.waitFor(() => {
+      expect(status.value).toBe("ready");
+    });
+
+    const defaultScores = slots.value.map((slot) => slot.score);
+
+    // Switching presets must trigger a recompute without a refetch.
+    profile.value = BUILT_IN_PROFILES["heat-sensitive"];
+    await nextTick();
+
+    const heatScores = slots.value.map((slot) => slot.score);
+    expect(heatScores).not.toEqual(defaultScores);
+    // No additional network calls — still the original 2 (forecast + AQI).
+    expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 });

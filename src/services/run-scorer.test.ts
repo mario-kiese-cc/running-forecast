@@ -215,6 +215,21 @@ describe("scoreToRating", () => {
     expect(scoreToRating(0)).toBe("avoid");
     expect(scoreToRating(29)).toBe("avoid");
   });
+
+  it("honours an override for the 'good' threshold (recovery run-type)", () => {
+    // Default: 52 → 'fair'. Recovery override (50) → 'good'.
+    expect(scoreToRating(52)).toBe("fair");
+    expect(scoreToRating(52, { good: 50 })).toBe("good");
+    expect(scoreToRating(50, { good: 50 })).toBe("good");
+    expect(scoreToRating(49, { good: 50 })).toBe("fair");
+  });
+
+  it("clamps the 'good' override within the surrounding thresholds", () => {
+    // Cannot push 'good' below 'fair' (30) or above 'great' (80).
+    expect(scoreToRating(25, { good: 10 })).toBe("avoid");
+    expect(scoreToRating(35, { good: 10 })).toBe("good");
+    expect(scoreToRating(85, { good: 200 })).toBe("great");
+  });
 });
 
 // --- Integration: computeFactors + computeOverallScore ---

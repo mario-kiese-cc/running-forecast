@@ -2,28 +2,27 @@ import type {
   HourlyData,
   ScoreFactors,
   ScoreRating,
+  ScoringProfile,
+  ScoringWeights,
   TimeSlot,
 } from "../types";
+import { DEFAULT_PROFILE } from "./scoring-profile-presets";
 
-/**
- * Factor weights — must sum to 1.0.
- * Precipitation matters most, then temperature.
- */
-const WEIGHTS = {
-  precipitation: 0.3,
-  temperature: 0.3,
-  wind: 0.1,
-  humidity: 0.1,
-  airQuality: 0.1,
-  daylight: 0.1,
-} as const;
-
-/** Score thresholds for rating labels */
+/** Default score thresholds for rating labels. Overridable per call. */
 const RATING_THRESHOLDS = {
   great: 80,
   good: 60,
   fair: 30,
 } as const;
+
+/**
+ * Per-call overrides for the rating thresholds. Currently only the `good`
+ * threshold is overridable (used by the `recovery` run type, ADR-006).
+ * Other thresholds may follow if needed.
+ */
+export interface RatingThresholdOverrides {
+  readonly good?: number;
+}
 
 /**
  * Score precipitation conditions (0–100).
@@ -45,48 +44,51 @@ export function scorePrecipitation(
 
 /**
  * Score temperature conditions (0–100).
- * Ideal "feels like" range: 8–18°C (score 100).
  *
- * Cold side: linear decline to 0 at -5°C.
+ * The curve *shape* is fixed (see ADR-005). Only the `idealRange` is
+ * tunable — it translates the plateau and the two flanks left/right:
+ *   - `[idealLow, idealHigh]` → 100 (plateau)
+ *   - cold flank of width 13 °C below `idealLow` → linear 100 → 0
+ *   - warm flank: 2 °C above `idealHigh` taper 100 → 80, then 8 °C
+ *     decline 80 → 0 (heat hurts disproportionately)
  *
- * Warm side: two-segment decline reflecting that heat impacts running
- * performance disproportionately more than equivalent cold.
- *   - 18 → 20°C: gentle taper 100 → 80 (warm but still pleasant)
- *   - 20 → 28°C: steep decline 80 → 0 (every degree noticeably hurts)
- *   - ≥28°C: 0 (effectively unrunnable for quality work)
+ * With the default range (8–18) this is byte-for-byte the original curve.
  */
-export function scoreTemperature(apparentTempCelsius: number): number {
-  const IDEAL_LOW = 8;
-  const IDEAL_HIGH = 18;
-  const EXTREME_LOW = -5;
-  const WARM_THRESHOLD = 20;
-  const WARM_SCORE = 80;
-  const EXTREME_HIGH = 28;
+export function scoreTemperature(
+  apparentTempCelsius: number,
+  idealRange: { low: number; high: number } = DEFAULT_PROFILE.idealApparentTempCelsius,
+): number {
+  const idealLow = idealRange.low;
+  const idealHigh = idealRange.high;
+  const COLD_FLANK_WIDTH = 13;
+  const WARM_TAPER_WIDTH = 2;
+  const WARM_TAPER_SCORE = 80;
+  const HOT_DECLINE_WIDTH = 8;
 
-  if (apparentTempCelsius >= IDEAL_LOW && apparentTempCelsius <= IDEAL_HIGH) {
+  const warmThreshold = idealHigh + WARM_TAPER_WIDTH;
+  const extremeHigh = warmThreshold + HOT_DECLINE_WIDTH;
+
+  if (apparentTempCelsius >= idealLow && apparentTempCelsius <= idealHigh) {
     return 100;
   }
 
-  if (apparentTempCelsius < IDEAL_LOW) {
-    const range = IDEAL_LOW - EXTREME_LOW;
-    const distance = IDEAL_LOW - apparentTempCelsius;
-    return Math.max(0, 100 - (distance / range) * 100);
+  if (apparentTempCelsius < idealLow) {
+    const distance = idealLow - apparentTempCelsius;
+    return Math.max(0, 100 - (distance / COLD_FLANK_WIDTH) * 100);
   }
 
-  // Warm zone: gentle taper from IDEAL_HIGH to WARM_THRESHOLD
-  if (apparentTempCelsius <= WARM_THRESHOLD) {
-    const range = WARM_THRESHOLD - IDEAL_HIGH;
-    const distance = apparentTempCelsius - IDEAL_HIGH;
-    return 100 - (distance / range) * (100 - WARM_SCORE);
+  // Warm taper from idealHigh to warmThreshold.
+  if (apparentTempCelsius <= warmThreshold) {
+    const distance = apparentTempCelsius - idealHigh;
+    return 100 - (distance / WARM_TAPER_WIDTH) * (100 - WARM_TAPER_SCORE);
   }
 
-  // Hot zone: steep decline from WARM_THRESHOLD to EXTREME_HIGH
-  if (apparentTempCelsius >= EXTREME_HIGH) {
+  // Hot decline from warmThreshold to extremeHigh.
+  if (apparentTempCelsius >= extremeHigh) {
     return 0;
   }
-  const range = EXTREME_HIGH - WARM_THRESHOLD;
-  const distance = apparentTempCelsius - WARM_THRESHOLD;
-  return WARM_SCORE - (distance / range) * WARM_SCORE;
+  const distance = apparentTempCelsius - warmThreshold;
+  return WARM_TAPER_SCORE - (distance / HOT_DECLINE_WIDTH) * WARM_TAPER_SCORE;
 }
 
 /**
@@ -149,26 +151,36 @@ export function scoreAirQuality(aqi: number | undefined): number {
 
 /**
  * Score daylight (0–100).
- * Daylight = 100, darkness = 20 (not 0 — running in the dark is possible, just less ideal).
+ * Daylight = 100, darkness = `darknessScore` (default 20 — running in the
+ * dark is possible, just less ideal). Winter-runner profile bumps this up.
  */
-export function scoreDaylight(isDaylight: boolean): number {
-  return isDaylight ? 100 : 20;
+export function scoreDaylight(
+  isDaylight: boolean,
+  darknessScore: number = DEFAULT_PROFILE.darknessScore,
+): number {
+  return isDaylight ? 100 : darknessScore;
 }
 
 /**
  * Compute individual factor scores for one hour.
  */
-export function computeFactors(hourly: HourlyData): ScoreFactors {
+export function computeFactors(
+  hourly: HourlyData,
+  profile: ScoringProfile = DEFAULT_PROFILE,
+): ScoreFactors {
   return {
     precipitation: scorePrecipitation(
       hourly.conditions.precipitationProbability,
       hourly.conditions.precipitationMm,
     ),
-    temperature: scoreTemperature(hourly.conditions.apparentTemperatureCelsius),
+    temperature: scoreTemperature(
+      hourly.conditions.apparentTemperatureCelsius,
+      profile.idealApparentTempCelsius,
+    ),
     wind: scoreWind(hourly.conditions.windSpeedKmh),
     humidity: scoreHumidity(hourly.conditions.relativeHumidity),
     airQuality: scoreAirQuality(hourly.aqi),
-    daylight: scoreDaylight(hourly.conditions.isDaylight),
+    daylight: scoreDaylight(hourly.conditions.isDaylight, profile.darknessScore),
   };
 }
 
@@ -176,35 +188,64 @@ export function computeFactors(hourly: HourlyData): ScoreFactors {
  * Compute the weighted overall score from individual factors.
  * Returns a value clamped to 0–100.
  */
-export function computeOverallScore(factors: ScoreFactors): number {
+export function computeOverallScore(
+  factors: ScoreFactors,
+  weights: ScoringWeights = DEFAULT_PROFILE.weights,
+): number {
   const weighted =
-    factors.precipitation * WEIGHTS.precipitation +
-    factors.temperature * WEIGHTS.temperature +
-    factors.wind * WEIGHTS.wind +
-    factors.humidity * WEIGHTS.humidity +
-    factors.airQuality * WEIGHTS.airQuality +
-    factors.daylight * WEIGHTS.daylight;
+    factors.precipitation * weights.precipitation +
+    factors.temperature * weights.temperature +
+    factors.wind * weights.wind +
+    factors.humidity * weights.humidity +
+    factors.airQuality * weights.airQuality +
+    factors.daylight * weights.daylight;
 
   return Math.round(Math.max(0, Math.min(100, weighted)));
 }
 
 /**
  * Map a numeric score to a human-readable rating.
+ *
+ * `overrides.good` lets callers soften (or stiffen) the `good` threshold
+ * — the `recovery` run type uses this to relabel a 52-score from `fair`
+ * to `good` (FR-8). The clamp keeps the override within the surrounding
+ * thresholds so an unreachable rating can't be produced.
  */
-export function scoreToRating(score: number): ScoreRating {
+export function scoreToRating(
+  score: number,
+  overrides?: RatingThresholdOverrides,
+): ScoreRating {
+  const goodThreshold = clampThreshold(
+    overrides?.good ?? RATING_THRESHOLDS.good,
+    RATING_THRESHOLDS.fair,
+    RATING_THRESHOLDS.great,
+  );
+
   if (score >= RATING_THRESHOLDS.great) return "great";
-  if (score >= RATING_THRESHOLDS.good) return "good";
+  if (score >= goodThreshold) return "good";
   if (score >= RATING_THRESHOLDS.fair) return "fair";
   return "avoid";
+}
+
+function clampThreshold(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
 }
 
 /**
  * Score a single hour of weather data into a TimeSlot.
  */
-export function scoreHour(hourly: HourlyData): TimeSlot {
-  const factors = computeFactors(hourly);
-  const score = computeOverallScore(factors);
-  const rating = scoreToRating(score);
+export function scoreHour(
+  hourly: HourlyData,
+  profile: ScoringProfile = DEFAULT_PROFILE,
+): TimeSlot {
+  const factors = computeFactors(hourly, profile);
+  const score = computeOverallScore(factors, profile.weights);
+  const rating = scoreToRating(score, {
+    good: profile.goodThresholdOverride,
+  });
 
   return {
     time: hourly.conditions.time,
@@ -220,6 +261,9 @@ export function scoreHour(hourly: HourlyData): TimeSlot {
  * Score an array of hourly data into TimeSlots.
  * Returns slots in the same order as input.
  */
-export function scoreAllHours(hours: ReadonlyArray<HourlyData>): TimeSlot[] {
-  return hours.map(scoreHour);
+export function scoreAllHours(
+  hours: ReadonlyArray<HourlyData>,
+  profile: ScoringProfile = DEFAULT_PROFILE,
+): TimeSlot[] {
+  return hours.map((hourly) => scoreHour(hourly, profile));
 }
